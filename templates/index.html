@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employee Management</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body class="bg-light">
+  <div class="container py-5">
+    <h1 class="text-center mb-4">Employee Management System</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="row g-4">
+      <div class="col-md-4">
+        <form method="POST" action="/add" class="p-3 bg-white rounded shadow">
+          <h4>Add Employee</h4>
+          <input type="text" name="id" placeholder="ID" class="form-control mb-2" required>
+          <input type="text" name="name" placeholder="Name" class="form-control mb-2" required>
+          <input type="number" name="salary" placeholder="Salary" class="form-control mb-2" required>
+          <button class="btn btn-primary w-100">Add</button>
+        </form>
+      </div>
+      <div class="col-md-4">
+        <form method="POST" action="/update" class="p-3 bg-white rounded shadow">
+          <h4>Update Employee</h4>
+          <input type="text" name="id" placeholder="ID" class="form-control mb-2" required>
+          <input type="text" name="name" placeholder="Name" class="form-control mb-2" required>
+          <input type="number" name="salary" placeholder="Salary" class="form-control mb-2" required>
+          <button class="btn btn-warning w-100">Update</button>
+        </form>
+      </div>
+      <div class="col-md-4">
+        <div class="p-3 bg-white rounded shadow">
+          <h4>Location & Temperature</h4>
+          <p id="location">Location: ...</p>
+          <p id="temperature">Temperature: ...</p>
+          <button class="btn btn-info w-100" onclick="getInfo()">Refresh Info</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-5 bg-white rounded shadow p-3">
+      <h4>Employee List</h4>
+      <table class="table table-bordered table-striped">
+        <thead><tr><th>ID</th><th>Name</th><th>Salary</th><th>Action</th></tr></thead>
+        <tbody>
+          {% for emp in employees %}
+          <tr>
+            <td>{{ emp.id }}</td>
+            <td>{{ emp.name }}</td>
+            <td>{{ emp.salary }}</td>
+            <td><a href="/delete/{{ emp.id }}" class="btn btn-danger btn-sm">Delete</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="text-center mt-4">
+      <button class="btn btn-success" onclick="loadChart()">Show Salary Chart</button>
+      <img id="chart" class="img-fluid mt-3" style="max-height:300px"/>
+    </div>
+  </div>
+
+  <script>
+    function getInfo() {
+      axios.get('/location').then(res => document.getElementById('location').innerText = 'Location: ' + res.data.location);
+      axios.get('/temperature').then(res => document.getElementById('temperature').innerText = 'Temperature: ' + res.data.temperature);
+    }
+    function loadChart() {
+      axios.get('/chart').then(res => {
+        document.getElementById('chart').src = 'data:image/png;base64,' + res.data.chart;
+      });
+    }
+    getInfo();
+  </script>
+</body>
+</html>
